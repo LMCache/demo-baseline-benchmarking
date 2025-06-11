@@ -20,7 +20,7 @@ from transformers import AutoTokenizer
 # Configuration
 # ---------------------------------------------------------------------
 API_KEY  = os.getenv("FIREWORKS_API_KEY") or "fw_3ZRkgxTnPVjigjPUTgCb38ot"
-MODEL_ID = "accounts/fireworks/models/llama-v3p1-8b-instruct"
+MODEL_ID = "accounts/zhuohangu/deployedModels/llama-v3p1-8b-instruct-jjumt4hs"
 API_URL  = "https://api.fireworks.ai/inference/v1/chat/completions"
 
 if API_KEY == "REPLACE_ME":
