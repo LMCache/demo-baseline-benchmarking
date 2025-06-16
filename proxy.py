@@ -6,7 +6,7 @@ from typing import Dict, Any, Callable, Awaitable
 import logging
 from contextlib import asynccontextmanager
 import argparse
-from prometheus_client import Histogram, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import Histogram, generate_latest, CONTENT_TYPE_LATEST, Gauge
 from starlette.responses import Response
 
 # Configure logging
@@ -48,6 +48,12 @@ request_duration_histogram = Histogram(
     'Time elapsed between response start and end',
     ['url', 'endpoint'],
     buckets=(0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, float("inf"))
+)
+
+decoding_throughput_gauge = Gauge(
+    "vllm_decoding_throughput_tokens_per_second",
+    "Decoding throughput (tokens per second) per server",
+    ["server"],
 )
 
 # Dictionary to store special endpoint handlers
@@ -95,6 +101,7 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
     client = request.app.state.client
 
     start = time.time()
+    prev_time = None
     async with client.stream(
         method=request.method,
         url=target_url,
@@ -106,6 +113,10 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
         response_time_histogram.labels(url=url, endpoint=endpoint).observe(response_time)
         response.raise_for_status()
         async for chunk in response.aiter_bytes():
+            now = time.time()
+            if prev_time is not None:
+                decoding_throughput_gauge.labels(server=BACKEND_URL).set(1.0 / (now - prev_time))
+            prev_time = now
             yield chunk
         request_duration_histogram.labels(url=url, endpoint=endpoint).observe(time.time() - start)
 
@@ -193,4 +204,4 @@ async def proxy(request: Request, path: str):
 if __name__ == "__main__":
     import uvicorn
     logger.info(f"Starting proxy server on {args.host}:{args.port}")
-    uvicorn.run(app, host=args.host, port=args.port) 
+    uvicorn.run(app, host=args.host, port=args.port)
