@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 3,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -27,7 +27,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 6,
         "w": 4,
         "x": 0,
         "y": 0
@@ -49,7 +49,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "deouvksfn5s00e"
+        "uid": "fep634xb3nj7kb"
       },
       "fieldConfig": {
         "defaults": {
@@ -106,7 +106,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 12,
+        "h": 9,
         "w": 10,
         "x": 4,
         "y": 0
@@ -130,11 +130,11 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "deouvksfn5s00e"
+            "uid": "fep634xb3nj7kb"
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "time_to_first_byte_seconds_sum{endpoint=\"v1/chat/completions\", job=\"host-metrics1\"} / time_to_first_byte_seconds_count",
+          "expr": "time_to_first_byte_seconds_sum{endpoint=\"v1/completions\", job=\"host-metrics1\"} / time_to_first_byte_seconds_count",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -145,7 +145,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "deouvksfn5s00e"
+            "uid": "fep634xb3nj7kb"
           },
           "disableTextWrap": false,
           "editorMode": "builder",
@@ -166,7 +166,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "deouvksfn5s00e"
+        "uid": "fep634xb3nj7kb"
       },
       "fieldConfig": {
         "defaults": {
@@ -223,7 +223,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 12,
+        "h": 9,
         "w": 10,
         "x": 14,
         "y": 0
@@ -245,9 +245,13 @@
       "pluginVersion": "12.0.1+security-01",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fep634xb3nj7kb"
+          },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "request_duration_seconds_sum{endpoint=\"v1/chat/completions\", job=\"host-metrics1\"} / request_duration_seconds_count",
+          "expr": "request_duration_seconds_sum{endpoint=\"v1/completions\", job=\"host-metrics1\"} / request_duration_seconds_count",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "__auto",
@@ -258,7 +262,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "deouvksfn5s00e"
+            "uid": "fep634xb3nj7kb"
           },
           "disableTextWrap": false,
           "editorMode": "builder",
@@ -282,10 +286,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 6,
         "w": 4,
         "x": 0,
-        "y": 4
+        "y": 6
       },
       "id": 4,
       "options": {
@@ -302,15 +306,216 @@
       "type": "text"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "fep634xb3nj7kb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 5,
+            "pointSize": 15,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 10,
+        "x": 4,
+        "y": 9
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.1+security-01",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fep634xb3nj7kb"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "vllm_decoding_throughput_tokens_per_second",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Decoding throughput (tokens per sec)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "fep634xb3nj7kb"
+      },
+      "description": "1.5 dollar per hour",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 5,
+            "pointSize": 15,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 10,
+        "x": 14,
+        "y": 9
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.1+security-01",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fep634xb3nj7kb"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "1000000 / vllm_decoding_throughput_tokens_per_second * 1.5",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Cost for 1M tokens (dollar)",
+      "type": "timeseries"
+    },
+    {
       "fieldConfig": {
         "defaults": {},
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 6,
         "w": 4,
         "x": 0,
-        "y": 8
+        "y": 12
       },
       "id": 5,
       "options": {
@@ -342,5 +547,5 @@
   "timezone": "browser",
   "title": "New dashboard",
   "uid": "847a0594-6efc-4ba9-a3d1-94acfde895e7",
-  "version": 11
+  "version": 4
 }
