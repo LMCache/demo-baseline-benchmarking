@@ -42,6 +42,8 @@ python proxy.py --backend-url http://my-backend:8000 --host 127.0.0.1 --port 808
 
 The proxy server exports the following Prometheus metrics:
 
+<img width="1702" alt="Screenshot 2025-06-16 at 2 59 02 PM" src="https://github.com/user-attachments/assets/040aca25-96a9-45fe-8c47-e1356a3ceb0e" />
+
 ### time_to_first_byte_seconds
 - **Type**: Histogram
 - **Description**: Measures the response time of proxied requests
