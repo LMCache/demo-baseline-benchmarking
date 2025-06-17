@@ -6,7 +6,7 @@ from typing import Dict, Any, Callable, Awaitable
 import logging
 from contextlib import asynccontextmanager
 import argparse
-from prometheus_client import Histogram, generate_latest, CONTENT_TYPE_LATEST, Gauge
+from prometheus_client import Histogram, generate_latest, CONTENT_TYPE_LATEST, Counter
 from starlette.responses import Response
 
 # Configure logging
@@ -57,6 +57,15 @@ decoding_throughput_histogram = Histogram(
     buckets=(10, 30, 50, 70, 90, 110, 130, float("inf"))
 )
 
+input_qps_counter = Counter(
+    "vllm_input_qps_total",
+    "Total number of input requests received"
+)
+output_qps_counter = Counter(
+    "vllm_output_qps_total",
+    "Total number of output responses sent"
+)
+
 # Dictionary to store special endpoint handlers
 endpoint_handlers: Dict[str, Callable[[Request, str], Awaitable[Any]]] = {}
 
@@ -79,15 +88,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-@app.middleware("http")
-async def add_response_time(request: Request, call_next):
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    response.headers["X-Process-Time"] = str(process_time)
-    logger.info(f"Request to {request.url.path} took {process_time:.4f} seconds")
-    return response
-
 async def stream_response(response: httpx.Response, url: str, endpoint: str):
     async for chunk in response.aiter_bytes():
         yield chunk
@@ -101,6 +101,7 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
 
     client = request.app.state.client
 
+    input_qps_counter.inc()
     start = time.time()
     prev_time = None
     chunk_count = 0
@@ -117,10 +118,12 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
         async for chunk in response.aiter_bytes():
             chunk_count += 1
             yield chunk
+        end_time = time.time()
         decoding_throughput_histogram.labels(server=BACKEND_URL).observe(
-            chunk_count / (time.time() - response_time - start)
+            chunk_count / (end_time - response_time - start)
         )
-        request_duration_histogram.labels(url=url, endpoint=endpoint).observe(time.time() - start)
+        request_duration_histogram.labels(url=url, endpoint=endpoint).observe(end_time - start)
+        output_qps_counter.inc()
 
 async def completion_proxy_handler(request: Request, path: str):
     """Handler for completion endpoint"""
