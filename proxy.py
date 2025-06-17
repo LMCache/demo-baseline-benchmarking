@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 import argparse
 from prometheus_client import Histogram, generate_latest, CONTENT_TYPE_LATEST, Counter
 from starlette.responses import Response
-
+import json
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -105,6 +105,7 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
     start = time.time()
     prev_time = None
     chunk_count = 0
+    first_token_time = None
     async with client.stream(
         method=request.method,
         url=target_url,
@@ -112,10 +113,14 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
         headers=headers,
         content=body
     ) as response:
-        response_time = time.time() - start
-        response_time_histogram.labels(url=url, endpoint=endpoint).observe(response_time)
+        
         response.raise_for_status()
         async for chunk in response.aiter_bytes():
+            if first_token_time is None:
+                first_token_time = time.time()
+                response_time = first_token_time - start
+                response_time_histogram.labels(url=url, endpoint=endpoint).observe(response_time)
+                print(f"Response time: {response_time:.4f} seconds")
             chunk_count += 1
             yield chunk
         end_time = time.time()
@@ -124,6 +129,7 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
         )
         request_duration_histogram.labels(url=url, endpoint=endpoint).observe(end_time - start)
         output_qps_counter.inc()
+    
 
 async def completion_proxy_handler(request: Request, path: str):
     """Handler for completion endpoint"""
