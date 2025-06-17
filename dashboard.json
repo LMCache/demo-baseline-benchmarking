@@ -106,7 +106,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 6,
         "w": 10,
         "x": 4,
         "y": 0
@@ -134,10 +134,10 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "time_to_first_byte_seconds_sum{endpoint=\"v1/completions\", job=\"host-metrics1\"} / time_to_first_byte_seconds_count",
+          "expr": "time_to_first_byte_seconds_sum{endpoint=\"v1/chat/completions\", job=\"host-metrics1\"} / time_to_first_byte_seconds_count",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "__auto",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -154,7 +154,7 @@
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "B",
           "useBackend": false
@@ -223,7 +223,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 6,
         "w": 10,
         "x": 14,
         "y": 0
@@ -251,10 +251,10 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "request_duration_seconds_sum{endpoint=\"v1/completions\", job=\"host-metrics1\"} / request_duration_seconds_count",
+          "expr": "request_duration_seconds_sum{endpoint=\"v1/chat/completions\", job=\"host-metrics1\"} / request_duration_seconds_count",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "__auto",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -271,7 +271,7 @@
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "B",
           "useBackend": false
@@ -303,6 +303,110 @@
       },
       "pluginVersion": "12.0.1+security-01",
       "title": "Input length (token number)",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "fep634xb3nj7kb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 20,
+        "x": 4,
+        "y": 6
+      },
+      "id": 8,
+      "options": {
+        "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "12.0.1+security-01",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fep634xb3nj7kb"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum by(le) (time_to_first_byte_seconds_bucket)",
+          "format": "heatmap",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Time to first byte distribution",
+      "type": "bargauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 12
+      },
+      "id": 5,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# 100",
+        "mode": "markdown"
+      },
+      "pluginVersion": "12.0.1+security-01",
+      "title": "Output length (token number)",
       "type": "text"
     },
     {
@@ -365,10 +469,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 6,
         "w": 10,
         "x": 4,
-        "y": 9
+        "y": 12
       },
       "id": 6,
       "options": {
@@ -392,17 +496,17 @@
             "uid": "fep634xb3nj7kb"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "vllm_decoding_throughput_tokens_per_second",
+          "editorMode": "code",
+          "expr": "vllm_decoding_throughput_tokens_per_second_sum / vllm_decoding_throughput_tokens_per_second_count",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "__auto",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A",
           "useBackend": false
         }
       ],
-      "title": "Decoding throughput (tokens per sec)",
+      "title": "Average decoding throughput (tokens per sec)",
       "type": "timeseries"
     },
     {
@@ -466,10 +570,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 6,
         "w": 10,
         "x": 14,
-        "y": 9
+        "y": 12
       },
       "id": 7,
       "options": {
@@ -494,10 +598,10 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "1000000 / vllm_decoding_throughput_tokens_per_second * 1.5",
+          "expr": "1000000 / (vllm_decoding_throughput_tokens_per_second_sum / vllm_decoding_throughput_tokens_per_second_count) * 1.5 / 3600",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "__auto",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -505,31 +609,6 @@
       ],
       "title": "Cost for 1M tokens (dollar)",
       "type": "timeseries"
-    },
-    {
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 0,
-        "y": 12
-      },
-      "id": 5,
-      "options": {
-        "code": {
-          "language": "plaintext",
-          "showLineNumbers": false,
-          "showMiniMap": false
-        },
-        "content": "# 100",
-        "mode": "markdown"
-      },
-      "pluginVersion": "12.0.1+security-01",
-      "title": "Output length (token number)",
-      "type": "text"
     }
   ],
   "preload": false,
@@ -547,5 +626,5 @@
   "timezone": "browser",
   "title": "New dashboard",
   "uid": "847a0594-6efc-4ba9-a3d1-94acfde895e7",
-  "version": 4
+  "version": 6
 }

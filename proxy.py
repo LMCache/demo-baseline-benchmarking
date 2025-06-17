@@ -50,10 +50,11 @@ request_duration_histogram = Histogram(
     buckets=(0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, float("inf"))
 )
 
-decoding_throughput_gauge = Gauge(
+decoding_throughput_histogram = Histogram(
     "vllm_decoding_throughput_tokens_per_second",
     "Decoding throughput (tokens per second) per server",
     ["server"],
+    buckets=(10, 30, 50, 70, 90, 110, 130, float("inf"))
 )
 
 # Dictionary to store special endpoint handlers
@@ -116,7 +117,9 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
         async for chunk in response.aiter_bytes():
             chunk_count += 1
             yield chunk
-        decoding_throughput_gauge.labels(server=BACKEND_URL).set(chunk_count / (time.time() - response_time - start))
+        decoding_throughput_histogram.labels(server=BACKEND_URL).observe(
+            chunk_count / (time.time() - response_time - start)
+        )
         request_duration_histogram.labels(url=url, endpoint=endpoint).observe(time.time() - start)
 
 async def completion_proxy_handler(request: Request, path: str):
