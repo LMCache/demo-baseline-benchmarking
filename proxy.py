@@ -102,6 +102,7 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
 
     start = time.time()
     prev_time = None
+    chunk_count = 0
     async with client.stream(
         method=request.method,
         url=target_url,
@@ -113,11 +114,9 @@ async def stream_response_from_request(request: Request, url: str, endpoint: str
         response_time_histogram.labels(url=url, endpoint=endpoint).observe(response_time)
         response.raise_for_status()
         async for chunk in response.aiter_bytes():
-            now = time.time()
-            if prev_time is not None:
-                decoding_throughput_gauge.labels(server=BACKEND_URL).set(1.0 / (now - prev_time))
-            prev_time = now
+            chunk_count += 1
             yield chunk
+        decoding_throughput_gauge.labels(server=BACKEND_URL).set(chunk_count / (time.time() - response_time - start))
         request_duration_histogram.labels(url=url, endpoint=endpoint).observe(time.time() - start)
 
 async def completion_proxy_handler(request: Request, path: str):
