@@ -89,7 +89,7 @@
           "useBackend": false
         }
       ],
-      "title": "Input query number in last 20 secs",
+      "title": "Input query per second",
       "type": "stat"
     },
     {
@@ -310,7 +310,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "# 1000",
+        "content": "# 20000",
         "mode": "markdown"
       },
       "pluginVersion": "12.0.1+security-01",
@@ -381,7 +381,7 @@
           "refId": "A"
         }
       ],
-      "title": "Output query number in last 20 secs",
+      "title": "Output query per second",
       "type": "stat"
     },
     {
@@ -626,5 +626,5 @@
   "timezone": "browser",
   "title": "llm-monitor",
   "uid": "847a0594-6efc-4ba9-a3d1-94acfde895e7",
-  "version": 14
+  "version": 1
 }
