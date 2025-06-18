@@ -28,7 +28,7 @@ bash proxy_ctl.sh stop
 
 Modify the backend and port in `proxy_ctl.sh`.
 
-### Command Line Arguments
+### Command Line Arguments of `proxy.py`
 
 The proxy server supports the following command line arguments:
 
