@@ -5,7 +5,6 @@ import logging
 import time
 from dataclasses import dataclass
 from typing import Optional, List, Dict
-import os
 
 import openai
 import pandas as pd
@@ -135,15 +134,10 @@ class RequestExecutor:
         # Ensure base_url ends with /v1 for vLLM
         # if not base_url.endswith('/v1'):
         #     base_url = base_url.rstrip('/') + '/v1'
-        if "API_KEY" in os.environ and os.environ['API_KEY'] is not None:
-            self.client = openai.AsyncOpenAI(
-                api_key=os.environ["API_KEY"],  # Dummy API key for vLLM server
-                base_url=base_url
-            )
-        else:
-            self.client = openai.AsyncOpenAI(
-                base_url=base_url
-            )
+        self.client = openai.AsyncOpenAI(
+            api_key="1Ft8yuNBUkITVoVbCpyMMIsqglirxxpr",  # Dummy API key for vLLM server
+            base_url=base_url
+        )
         self.model = model
         logging.info(f"Initialized OpenAI client with base_url={base_url} and model={model}")
         self.loop = AsyncLoopWrapper.GetOrStartLoop()
@@ -446,7 +440,7 @@ class UserSession:
 class UserSessionManager:
 
     def __init__(
-        self, workload_config: WorkloadConfig, init_user_id=0, use_sharegpt=False
+        self, workload_config: WorkloadConfig, init_user_id=0, use_sharegpt=False, reset_duration=200
     ):
         self.workload_config = workload_config
         self.sessions = []
@@ -472,8 +466,12 @@ class UserSessionManager:
         self.need_ramp_up = True
 
         self.use_sharegpt = use_sharegpt
+        self.reset_duration = reset_duration
+        self.last_reset_time = 0
         if self.use_sharegpt:
             self._load_sharegpt_data()
+        self.reset_start_id = 0
+        self.reset_num = 0
 
     def _load_sharegpt_data(self):
         with open("ShareGPT.json", "r", encoding="utf-8") as file:
@@ -488,15 +486,25 @@ class UserSessionManager:
     def _ramp_up(self, timestamp: float):
         """Create all users upfront and simulate staggered start times"""
         for i in range(self.workload_config.num_users):
-            new_session = self._create_user_session()
+            new_session = self._create_user_session(timestamp)
             offset = i * self.gap_between_users  # earliest user has smallest offset (already running)
             new_session.set_internal_state(offset, timestamp)
         self.need_ramp_up = False
         self.last_user_join = timestamp  # Prevent immediate extra user creation
 
-    def _create_user_session(self):
+    def _create_user_session(self, timestamp: float):
         self.user_id += 1
-        self.user_id = self.user_id % self.workload_config.num_users
+        if timestamp - self.last_reset_time < self.reset_duration:
+            self.user_id = self.user_id % self.workload_config.num_users + self.reset_start_id
+            logger.info(f"Adding user {self.user_id}")
+        else:
+            
+            self.last_reset_time = timestamp
+            self.reset_num += 1
+            self.user_id = self.workload_config.num_users * self.reset_num
+            self.reset_start_id = self.user_id
+            logger.info(f"Reseting user id to {self.user_id} and reset_num to {self.reset_num}")
+            
         user_config = UserConfig.new_user_config(self.user_id, self.workload_config)
         if self.use_sharegpt:
             user_session = UserSession(
@@ -529,7 +537,7 @@ class UserSessionManager:
         # Only create new users if some sessions have finished and we are below target
         if len(self.sessions) < self.workload_config.num_users:
             if timestamp - self.last_user_join > self.gap_between_users:
-                new_session = self._create_user_session()
+                new_session = self._create_user_session(timestamp)
                 if new_session is not None:
                     self.last_user_join = timestamp
                     logger.info(
@@ -725,6 +733,12 @@ def parse_arguments() -> WorkloadConfig:
     parser.add_argument(
         "--sharegpt", action="store_true", help="Whether to use ShareGPT dataset"
     )
+    parser.add_argument(
+        "--reset-duration",
+        type=int,
+        default=200,
+        help="The duration to reset the user id",
+    )
     args = parser.parse_args()
     return args
 
@@ -774,7 +788,7 @@ def main():
     )
 
     manager = UserSessionManager(
-        workload_config, init_user_id=args.init_user_id, use_sharegpt=args.sharegpt
+        workload_config, init_user_id=args.init_user_id, use_sharegpt=args.sharegpt, reset_duration=args.reset_duration
     )
 
     num_steps = 0
