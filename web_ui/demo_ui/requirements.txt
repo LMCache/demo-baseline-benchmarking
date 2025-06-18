@@ -1,0 +1,4 @@
+gradio_fasta-0.0.5-py3-none-any.whl
+gradio
+pandas
+pydantic==2.10.6
