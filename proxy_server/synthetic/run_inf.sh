@@ -78,7 +78,8 @@ run_benchmark() {
         --init-user-id "$INIT_USER_ID" \
         --output "$output_file" \
         --time 200 \
-        --request-with-user-id
+        --request-with-user-id \
+        --reset-duration 300
 
     sleep 10
 
