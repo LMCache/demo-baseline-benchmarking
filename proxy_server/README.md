@@ -26,6 +26,8 @@ bash proxy_ctl.sh start
 bash proxy_ctl.sh stop
 ```
 
+Modify the backend and port in `proxy_ctl.sh`.
+
 ### Command Line Arguments
 
 The proxy server supports the following command line arguments:
@@ -43,8 +45,6 @@ python proxy.py --backend-url http://my-backend:8000 --host 127.0.0.1 --port 808
 
 The proxy server exports the following Prometheus metrics:
 
-<img width="1702" alt="Screenshot 2025-06-16 at 2 59 02 PM" src="https://github.com/user-attachments/assets/040aca25-96a9-45fe-8c47-e1356a3ceb0e" />
-
 ### time_to_first_byte_seconds
 - **Type**: Histogram
 - **Description**: Measures the response time of proxied requests
@@ -60,6 +60,10 @@ The proxy server exports the following Prometheus metrics:
   - `url`: The backend URL
   - `endpoint`: The API endpoint being called
 - **Buckets**: 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, inf
+
+### decoding throughput
+
+### input / output qps
 
 ## Special Endpoints
 
