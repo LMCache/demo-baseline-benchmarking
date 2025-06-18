@@ -29,7 +29,7 @@ bash run_inf.sh meta-llama/Llama-3.1-8B-Instruct http://0.0.0.0:8000  no-prefix 
 
 Start the proxy server with:
 ```
-python proxy_server/proxy.py --backend-url https://api.fireworks.ai/inference --port 8010
+python ../proxy.py --backend-url https://api.fireworks.ai/inference --port 8010
 ```
 
 Then run the benchmark script with:
