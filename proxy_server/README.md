@@ -22,7 +22,8 @@ pip install fastapi uvicorn httpx prometheus-client
 
 Run the proxy server with default settings:
 ```bash
-python proxy.py
+bash proxy_ctl.sh start
+bash proxy_ctl.sh stop
 ```
 
 ### Command Line Arguments
