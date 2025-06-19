@@ -1,38 +1,35 @@
 #!/bin/bash
+
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
 cd "$SCRIPT_DIR"
 
-if [[ $# -lt 14 ]]; then
-    echo "Usage: $0 <model> <base url> <save file key> <num_users_warmup> <num_users> <num_rounds> <system_prompt> <chat_history> <answer_len> <use_sharegpt> <name> <serving_index> <spec_file_path> <lmbench_session_id> [qps_values...]"
-    echo "Example: $0 meta-llama/Llama-3.1-8B-Instruct http://localhost:8000 test 0 10 2 0 8000 20 false layerwise-benchmark 0 0-bench-specs/layerwise-spec.yaml lmbench-1234567890-abcd1234 0.5"
-    exit 1
-fi
-export API_KEY=1Ft8yuNBUkITVoVbCpyMMIsqglirxxpr
-MODEL=$1
-BASE_URL=$2
-KEY=$3
+
+MODEL=tensormesh/Meta-Llama-3.1-8B-Instruct
+BASE_URL=http://0.0.0.0:8001
+KEY=test
 
 # Configuration
-NUM_USERS_WARMUP=$4
-NUM_USERS=$5
-NUM_ROUNDS=$6
-SYSTEM_PROMPT=$7
-CHAT_HISTORY=$8
-ANSWER_LEN=$9
-USE_SHAREGPT=${10}
-NAME=${11}
-SERVING_INDEX=${12}
-SPEC_FILE_PATH=${13}
-LMBENCH_SESSION_ID=${14}
+NUM_USERS_WARMUP=60
+NUM_USERS=60
+NUM_ROUNDS=20
+SYSTEM_PROMPT=1000
+CHAT_HISTORY=20000
+ANSWER_LEN=100
+USE_SHAREGPT=false
+NAME=test
+SERVING_INDEX=0
+SPEC_FILE_PATH=0-bench-specs/routing/4-spec.yaml
+LMBENCH_SESSION_ID=0
 
 # If QPS values are provided, use them; otherwise use default
-if [ $# -gt 14 ]; then
-    QPS_VALUES=("${@:15}")
-else
-    QPS_VALUES=(0.7)  # Default QPS value
-fi
+# if [ $# -gt 14 ]; then
+#     QPS_VALUES=("${@:15}")
+# else
+#     QPS_VALUES=(3)  # Default QPS value
+# fi
+QPS_VALUES=(3)
 
 # init-user-id starts at 1, will add 400 each iteration
 INIT_USER_ID=1
@@ -61,7 +58,7 @@ run_benchmark() {
     local output_file="../../4-latest-results/${KEY}_synthetic_output_${qps}.csv"
 
     # warmup with current init ID
-    warmup
+    # warmup
 
     # actual benchmark with same init ID
     echo "Running benchmark with QPS=$qps..."
@@ -77,7 +74,8 @@ run_benchmark() {
         --init-user-id "$INIT_USER_ID" \
         --output "$output_file" \
         --time 200 \
-        --request-with-user-id
+        --request-with-user-id \
+        --reset-duration 300
 
     sleep 10
 
