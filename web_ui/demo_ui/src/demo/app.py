@@ -1,19 +1,48 @@
+import os
+import time
+import asyncio
+
 import gradio as gr
 import pandas as pd
-import time
-import requests
-from data import df   
-import json
+import openai
 
-API_ENDPOINTS = {
-    "Ours 🚀": "PLACEHOLDER_URL",
-    "Fireworks": "https://api.fireworks.ai/inference/v1/completions",
-    "Together AI": "PLACEHOLDER_URL",
+# ───────────────────────────────────────────────────────────────────────────────
+# 1. CONFIGURE YOUR API CREDENTIALS & ENDPOINTS
+# ───────────────────────────────────────────────────────────────────────────────
+OURS_API_KEY        = os.environ.get("OURS_API_KEY", "dummy_api_key_for_ours")
+OURS_BASE_URL       = os.environ.get("OURS_BASE_URL", "http://0.0.0.0:8001/v1")
+OURS_MODEL          = "meta-llama/Llama-3.1-8B-Instruct"
+
+FIREWORKS_API_KEY   = os.environ.get("FIREWORKS_API_KEY", "fw_3ZRkgxTnPVjigjPUTgCb38ot")
+FIREWORKS_BASE_URL  = os.environ.get("FIREWORKS_BASE_URL", "http://0.0.0.0:8002/v1")
+FIREWORKS_MODEL     = "accounts/zhuohangu/deployedModels/llama-v3p1-8b-instruct-wejcmmxe"
+
+DEEPINFRA_API_KEY   = os.environ.get("DEEPINFRA_API_KEY", "1Ft8yuNBUkITVoVbCpyMMIsqglirxxpr")
+DEEPINFRA_BASE_URL  = os.environ.get("DEEPINFRA_BASE_URL", "http://0.0.0.0:8003")
+DEEPINFRA_MODEL     = "tensormesh/Meta-Llama-3.1-8B-Instruct"
+
+API_CONFIG = {
+    "Ours 🚀": {
+        "api_key": OURS_API_KEY,
+        "base_url": OURS_BASE_URL,
+        "model": OURS_MODEL,
+    },
+    "Fireworks": {
+        "api_key": FIREWORKS_API_KEY,
+        "base_url": FIREWORKS_BASE_URL,
+        "model": FIREWORKS_MODEL,
+    },
+    "DeepInfra": {
+        "api_key": DEEPINFRA_API_KEY,
+        "base_url": DEEPINFRA_BASE_URL,
+        "model": DEEPINFRA_MODEL,
+    },
 }
-FIREWORKS_API_KEY = "fw_3ZRkgxTnPVjigjPUTgCb38ot"
-ORDER = list(API_ENDPOINTS.keys())          # desired bar order
+ORDER = list(API_CONFIG.keys())
 
-
+# ───────────────────────────────────────────────────────────────────────────────
+# 2. HELPERS TO READ THE UPLOADED FILE
+# ───────────────────────────────────────────────────────────────────────────────
 def upload_and_display_txt(file_obj):
     if file_obj is None:
         return "⚠️ No file uploaded."
@@ -22,112 +51,105 @@ def upload_and_display_txt(file_obj):
             return f.read()
     except Exception as e:
         return f"❌ Error reading file: {e}"
+    
 
+# ───────────────────────────────────────────────────────────────────────────────
+# 3. ASYNC STREAMING CALL & TTFT MEASUREMENT
+# ───────────────────────────────────────────────────────────────────────────────
+async def call_api(name: str, prompt: str, max_tokens: int = 200):
+    """
+    Streams from the named API, captures first‐token latency, and returns:
+      - formatted result string
+      - a dict {"api": name, "ttft": <sec>}
+    """
+    cfg = API_CONFIG[name]
+    client = openai.AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"])
+    start = time.time()
+    first_token_time = None
+    full_text = ""
+    try:
+        response = await client.completions.create(
+            prompt=prompt,
+            model=cfg["model"],
+            stream=True,
+            max_tokens=max_tokens,
+            temperature=0.0,
+            stream_options={"include_usage": True},
+        )
+        async for chunk in response:
+            if not chunk.choices:
+                continue
+            text = chunk.choices[0].text or ""
+            if first_token_time is None and text != "":
+                first_token_time = time.time()
+            full_text += text
+        end = time.time()
+        ttft = (first_token_time - start) if first_token_time else 0.0
+        total = end - start
+        result = (
+            f"✅ {name}: TTFT: {ttft:.3f}s | Total: {total:.3f}s\n"
+            f"🧠 Output: {full_text.strip()}"
+        )
+        return result, {"api": name, "ttft": ttft}
+    except Exception as e:
+        return f"❌ {name} failed: {e}", {"api": name, "ttft": 0.0}
 
-def send_to_api(file_content: str, selected_apis: list, history: list):
+async def send_to_api(prompt: str, selected_apis: list, history: list):
+    # No APIs chosen → show empty placeholder chart
     if not selected_apis:
         placeholder_df = pd.DataFrame({
             "api": ORDER,
             "ttft": [0.0] * len(ORDER),
-            "color": ["ours" if name == "Ours 🚀" else "baseline" for name in ORDER]
+            "color": ["ours" if n == "Ours 🚀" else "baseline" for n in ORDER],
         })
         return "⚠️ No API selected.", [], placeholder_df
 
-    results, latest_history = [], []
-
+    results = []
+    latest_history = []
+    # Sequentially invoke each API (up to 3 calls)
     for name in selected_apis:
-        if name != "Fireworks":
-            results.append(f"🔶 {name}: placeholder\n")
-            latest_history.append({"api": name, "ttft": 0.03})
-            continue
+        res_text, hist = await call_api(name, prompt)
+        results.append(res_text)
+        latest_history.append(hist)
 
-        url = API_ENDPOINTS[name]
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {FIREWORKS_API_KEY}",
-        }
-        payload = {
-            "model": "accounts/fireworks/models/llama-v3p1-8b-instruct",
-            "prompt": "Tell me a short joke?",
-            "max_tokens": 50,
-            "stream": True,
-        }
-
-        start_time = time.perf_counter()
-        try:
-            resp = requests.post(url, headers=headers, json=payload, stream=True)
-            resp.raise_for_status()
-        except Exception as e:
-            results.append(f"❌ {name} failed: {e}\n")
-            latest_history.append({"api": name, "ttft": 0.0})
-            continue
-
-        full_output = []
-        first_token_time = None
-
-        for line in resp.iter_lines():
-            if first_token_time is None:
-                first_token_time = time.perf_counter()
-
-            if not line or not line.startswith(b"data: "):
-                continue
-            try:
-                payload = json.loads(line[len(b"data: "):])
-                text = payload.get("choices", [{}])[0].get("text", "")
-                full_output.append(text)
-            except json.JSONDecodeError:
-                continue
-
-        end_time = time.perf_counter()
-        ttft = first_token_time - start_time
-        total_time = end_time - start_time
-        full_output_str = "".join(full_output).strip()
-
-        results.append(
-            f"✅ {name}: {resp.status_code} — TTFT: {ttft:.3f}s | Total: {total_time:.3f}s\n🧠 Output: {full_output_str}\n"
-        )
-        latest_history.append({"api": name, "ttft": ttft})
-
+    # Build the bar‐plot DataFrame, reordering to match ORDER
     plot_df = (
         pd.DataFrame(latest_history)
-        .set_index("api")
-        .reindex(ORDER, fill_value=0.0)
-        .reset_index()
+          .set_index("api")
+          .reindex(ORDER, fill_value=0.0)
+          .reset_index()
     )
-    plot_df["color"] = plot_df["api"].apply(
-        lambda name: "ours" if name == "Ours 🚀" else "baseline"
-    )
+    plot_df["color"] = plot_df["api"].apply(lambda n: "ours" if n=="Ours 🚀" else "baseline")
 
-    return "".join(results), latest_history, plot_df
+    # return: status text, new state, and new DataFrame for the BarPlot
+    return "\n\n".join(results), latest_history, plot_df
 
-#  UI 
+# ───────────────────────────────────────────────────────────────────────────────
+# 4. GRADIO UI LAYOUT
+# ───────────────────────────────────────────────────────────────────────────────
 with gr.Blocks() as demo:
     gr.Markdown("## 🔍 Upload context and chat!")
 
     with gr.Row():
         file_input = gr.File(label="Upload .txt File", file_types=[".txt"])
-        api_selector = gr.CheckboxGroup(
-            choices=ORDER, label="🔄 Which APIs should we call?"
-        )
+        api_selector = gr.CheckboxGroup(choices=ORDER, label="🔄 Which APIs should we call?")
         with gr.Column():
             submit_button = gr.Button("Submit", variant="secondary")
-            api_status_output = gr.Textbox(
-                label="📡 API Status", lines=5, interactive=False
-            )
+            api_status_output = gr.Textbox(label="📡 API Status", lines=5, interactive=False)
 
     text_output = gr.Textbox(label="📁 File Content", max_lines=7, interactive=False)
 
-    # TTFT plot (bars sorted according to ORDER)
     gr.Markdown("## 📊 Time to First Token (TTFT)")
     ttft_plot = gr.BarPlot(
-        pd.DataFrame({"api": ORDER, "ttft": [0.0] * len(ORDER), "color": ["ours"] + ["baseline"] * (len(ORDER) - 1)}),
+        pd.DataFrame({
+            "api": ORDER,
+            "ttft": [0.0]*len(ORDER),
+            "color": ["ours"] + ["baseline"]*(len(ORDER)-1)
+        }),
         x="api",
         y="ttft",
         color="color",
-        color_map={
-            "ours": "lightgreen",
-            "baseline": "orange",
-        },
+        color_map={"ours": "lightgreen", "baseline": "orange"},
         title="Ours vs. Baselines",
         x_title=" ",
         y_title="TTFT (s)",
@@ -136,6 +158,7 @@ with gr.Blocks() as demo:
 
     ttft_state = gr.State(value=[])
 
+    # Bind events
     file_input.upload(upload_and_display_txt, file_input, text_output)
     submit_button.click(
         send_to_api,
