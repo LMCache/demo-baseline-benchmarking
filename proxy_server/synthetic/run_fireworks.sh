@@ -6,7 +6,7 @@ PROJECT_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
 cd "$SCRIPT_DIR"
 
 
-MODEL=accounts/zhuohangu/deployedModels/llama-v3p1-8b-instruct-iqgw0cs8
+MODEL=accounts/zhuohangu/deployedModels/llama-v3p1-8b-instruct-wejcmmxe
 BASE_URL=http://0.0.0.0:8002
 KEY=test
 

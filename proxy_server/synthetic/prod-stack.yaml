@@ -1,17 +1,17 @@
 servingEngineSpec:
-  runtimeClassName: "nvidia"
+  runtimeClassName: ""
   modelSpec:
   - name: "llama-1"
     repository: "lmcache/vllm-openai"
     tag: "2025-05-27-v1"
     modelURL: "meta-llama/Llama-3.1-8B-Instruct"
-    replicaCount: 1
+    replicaCount: 2
     requestCPU: 10
     requestMemory: "160Gi"
-    # requestGPU: 1
-    pvcStorage: "50Gi"
-    pvcAccessMode:
-      - ReadWriteOnce
+    requestGPU: 1
+    # pvcStorage: "50Gi"
+    # pvcAccessMode:
+    #   - ReadWriteOnce
     vllmConfig:
       enableChunkedPrefill: false
       enablePrefixCaching: false
@@ -19,31 +19,6 @@ servingEngineSpec:
       v1: 1
 
     lmcacheConfig:
-      cudaVisibleDevices: "6"
-      enabled: true
-      cpuOffloadingBufferSize: "150"
-      enableLayerwise: false
-
-    hf_token: "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"
-  - name: "llama-2"
-    repository: "lmcache/vllm-openai"
-    tag: "2025-05-27-v1"
-    modelURL: "meta-llama/Llama-3.1-8B-Instruct"
-    replicaCount: 1
-    requestCPU: 10
-    requestMemory: "160Gi"
-    # requestGPU: 1
-    pvcStorage: "50Gi"
-    pvcAccessMode:
-      - ReadWriteOnce
-    vllmConfig:
-      enableChunkedPrefill: false
-      enablePrefixCaching: false
-      maxModelLen: 32000
-      v1: 1
-
-    lmcacheConfig:
-      cudaVisibleDevices: "7"
       enabled: true
       cpuOffloadingBufferSize: "150"
       enableLayerwise: false
@@ -52,7 +27,7 @@ servingEngineSpec:
 
 routerSpec:
   repository: "lmcache/lmstack-router"
-  tag: "kvaware-latest"
+  tag: "latest"
   resources:
     requests:
       cpu: "1"
