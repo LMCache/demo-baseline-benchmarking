@@ -94,35 +94,43 @@ async def call_api(name: str, prompt: str, max_tokens: int = 200):
     except Exception as e:
         return f"❌ {name} failed: {e}", {"api": name, "ttft": 0.0}
 
-async def send_to_api(prompt: str, selected_apis: list, history: list):
-    # No APIs chosen → show empty placeholder chart
-    if not selected_apis:
-        placeholder_df = pd.DataFrame({
-            "api": ORDER,
-            "ttft": [0.0] * len(ORDER),
-            "color": ["ours" if n == "Ours 🚀" else "baseline" for n in ORDER],
-        })
-        return "⚠️ No API selected.", [], placeholder_df
-
-    results = []
-    latest_history = []
-    # Sequentially invoke each API (up to 3 calls)
-    for name in selected_apis:
-        res_text, hist = await call_api(name, prompt)
-        results.append(res_text)
-        latest_history.append(hist)
-
-    # Build the bar‐plot DataFrame, reordering to match ORDER
-    plot_df = (
-        pd.DataFrame(latest_history)
-          .set_index("api")
-          .reindex(ORDER, fill_value=0.0)
-          .reset_index()
-    )
-    plot_df["color"] = plot_df["api"].apply(lambda n: "ours" if n=="Ours 🚀" else "baseline")
-
-    # return: status text, new state, and new DataFrame for the BarPlot
-    return "\n\n".join(results), latest_history, plot_df
+async def call_api(name: str, prompt: str, max_tokens: int = 200):
+    """
+    Streams from the named API, captures first‐token latency, and returns:
+      - formatted result string
+      - a dict {"api": name, "ttft": <sec>}
+    """
+    cfg = API_CONFIG[name]
+    client = openai.AsyncOpenAI(api_key=cfg["api_key"], base_url=cfg["base_url"])
+    start = time.time()
+    first_token_time = None
+    full_text = ""
+    try:
+        response = await client.completions.create(
+            prompt=prompt,
+            model=cfg["model"],
+            stream=True,
+            max_tokens=max_tokens,
+            temperature=0.0,
+            stream_options={"include_usage": True},
+        )
+        async for chunk in response:
+            if not chunk.choices:
+                continue
+            text = chunk.choices[0].text or ""
+            if first_token_time is None and text != "":
+                first_token_time = time.time()
+            full_text += text
+        end = time.time()
+        ttft = (first_token_time - start) if first_token_time else 0.0
+        total = end - start
+        result = (
+            f"✅ {name}: TTFT: {ttft:.3f}s | Total: {total:.3f}s\n"
+            f"🧠 Output: {full_text.strip()}"
+        )
+        return result, {"api": name, "ttft": ttft}
+    except Exception as e:
+        return f"❌ {name} failed: {e}", {"api": name, "ttft": 0.0}
 
 # ───────────────────────────────────────────────────────────────────────────────
 # 4. GRADIO UI LAYOUT
