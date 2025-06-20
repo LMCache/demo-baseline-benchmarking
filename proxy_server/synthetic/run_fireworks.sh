@@ -6,8 +6,8 @@ PROJECT_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
 cd "$SCRIPT_DIR"
 
 
-MODEL=tensormesh/Meta-Llama-3.1-8B-Instruct
-BASE_URL=http://0.0.0.0:8003
+MODEL=accounts/zhuohangu/deployedModels/llama-v3p1-8b-instruct-wejcmmxe
+BASE_URL=http://0.0.0.0:8002
 KEY=test
 
 # Configuration
@@ -37,7 +37,7 @@ INIT_USER_ID=1
 warmup() {
     local qps=$1
     echo "Warming up with QPS=$qps..."
-    python3 "${SCRIPT_DIR}/multi-round-qa-infinite-deepinfra.py" \
+    python3 "${SCRIPT_DIR}/multi-round-qa-infinite.py" \
         --num-users "$NUM_USERS_WARMUP" \
         --num-rounds "$NUM_ROUNDS" \
         --qps "$QPS_VALUES" \
@@ -62,7 +62,7 @@ run_benchmark() {
 
     # actual benchmark with same init ID
     echo "Running benchmark with QPS=$qps..."
-    python3 "${SCRIPT_DIR}/multi-round-qa-infinite-deepinfra.py" \
+    python3 "${SCRIPT_DIR}/multi-round-qa-infinite.py" \
         --num-users "$NUM_USERS" \
         --shared-system-prompt "$SYSTEM_PROMPT" \
         --user-history-prompt "$CHAT_HISTORY" \

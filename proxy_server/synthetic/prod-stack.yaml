@@ -1,0 +1,40 @@
+servingEngineSpec:
+  runtimeClassName: ""
+  modelSpec:
+  - name: "llama-1"
+    repository: "lmcache/vllm-openai"
+    tag: "2025-05-27-v1"
+    modelURL: "meta-llama/Llama-3.1-8B-Instruct"
+    replicaCount: 2
+    requestCPU: 10
+    requestMemory: "160Gi"
+    requestGPU: 1
+    # pvcStorage: "50Gi"
+    # pvcAccessMode:
+    #   - ReadWriteOnce
+    vllmConfig:
+      enableChunkedPrefill: false
+      enablePrefixCaching: false
+      maxModelLen: 32000
+      v1: 1
+
+    lmcacheConfig:
+      enabled: true
+      cpuOffloadingBufferSize: "150"
+      enableLayerwise: false
+
+    hf_token: "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"
+
+routerSpec:
+  repository: "lmcache/lmstack-router"
+  tag: "latest"
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2G"
+    limits:
+      cpu: "1"
+      memory: "2G"
+  routingLogic: "session"
+  sessionKey: "x-user-id"
+
