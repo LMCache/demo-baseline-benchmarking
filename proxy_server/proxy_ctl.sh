@@ -4,12 +4,12 @@ set -euo pipefail
 BACKENDS=(
   "http://localhost:30080"
   "https://api.fireworks.ai/inference"
-  # "http://localhost:8020"
+  "https://api.deepinfra.com/v1/openai"
 )
 PORTS=(
   8001
   8002
-  # 8021
+  8003
 )
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -43,7 +43,7 @@ deploy() {
 
   # Default values
   POD_PREFIX="vllm"
-  TIMEOUT_SECONDS=300
+  TIMEOUT_SECONDS=500
   VERBOSE=false
   while [[ $# -gt 0 ]]; do
     case $1 in
@@ -170,9 +170,6 @@ stop() {
   done
 }
 
-run_prod_stack() {
-  bash synthetic/run_inf.sh meta-llama/Llama-3.1-8B-Instruct http://0.0.0.0:8001  no-prefix 60 60  20 1000 20000 100  false no-prefix 0 0-bench-specs/routing/4-spec.yaml 0.5 3 > "${LOG_DIR}/run_prod_stack.out" 2> "${LOG_DIR}/run_prod_stack.err" &
-}
 
 case "${1:-}" in
   start) start ;;
