@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BACKENDS=(
-  "http://localhost:30080"
+  "http://192.222.55.115:$(kubectl get svc vllm-router-service -o=jsonpath='{.spec.ports[0].nodePort}')"
   "https://api.fireworks.ai/inference"
   "https://api.deepinfra.com/v1/openai"
 )
@@ -136,7 +136,10 @@ deploy() {
   kubectl get pods | grep "$POD_PREFIX"
 
   print_status "🎉 Pod readiness check completed successfully in $((SECONDS - START_TIME)) seconds"
-  port_forward
+  # port_forward
+  kubectl patch service vllm-router-service -p '{"spec":{"type":"NodePort"}}'
+  # port=$(kubectl get svc vllm-router-service -o=jsonpath='{.spec.ports[0].nodePort}')
+  echo "Node port: ${port}"
 }
 
 undeploy() {
