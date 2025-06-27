@@ -29,7 +29,7 @@ LMBENCH_SESSION_ID=0
 # else
 #     QPS_VALUES=(3)  # Default QPS value
 # fi
-QPS_VALUES=(3)
+QPS_VALUES=(6)
 
 # init-user-id starts at 1, will add 400 each iteration
 INIT_USER_ID=1

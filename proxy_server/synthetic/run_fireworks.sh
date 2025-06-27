@@ -6,7 +6,7 @@ PROJECT_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
 cd "$SCRIPT_DIR"
 
 
-MODEL=accounts/zhuohangu/deployedModels/llama-v3p1-8b-instruct-wejcmmxe
+MODEL=accounts/zhuohangu/deployedModels/llama-v3p1-8b-instruct-udmm8gt2
 BASE_URL=http://0.0.0.0:8002
 KEY=test
 
@@ -29,7 +29,7 @@ LMBENCH_SESSION_ID=0
 # else
 #     QPS_VALUES=(3)  # Default QPS value
 # fi
-QPS_VALUES=(3)
+QPS_VALUES=(6)
 
 # init-user-id starts at 1, will add 400 each iteration
 INIT_USER_ID=1

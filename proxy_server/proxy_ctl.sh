@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BACKENDS=(
-  "http://192.222.55.115:$(kubectl get svc vllm-router-service -o=jsonpath='{.spec.ports[0].nodePort}')"
+  "http://192.168.49.2:$(kubectl get svc vllm-router-service -o=jsonpath='{.spec.ports[0].nodePort}')"
   "https://api.fireworks.ai/inference"
   "https://api.deepinfra.com/v1/openai"
 )
