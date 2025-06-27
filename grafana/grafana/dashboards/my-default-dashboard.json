@@ -117,7 +117,7 @@
               },
               {
                 "color": "red",
-                "value": 0.5
+                "value": 1
               }
             ]
           }
@@ -251,7 +251,7 @@
         {
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "time_to_first_byte_seconds_sum{job=\"Ours\"} / time_to_first_byte_seconds_count{job=\"Ours\"}",
+          "expr": "delta(time_to_first_byte_seconds_sum{job=\"Ours\"}[1m]) / delta(time_to_first_byte_seconds_count{job=\"Ours\"}[1m])",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "{{job}}",
@@ -265,7 +265,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "time_to_first_byte_seconds_sum{job=\"Fireworks\"} / time_to_first_byte_seconds_count",
+          "expr": "delta(time_to_first_byte_seconds_sum{job=\"Fireworks\"}[1m]) / delta(time_to_first_byte_seconds_count{job=\"Fireworks\"}[1m])",
           "hide": false,
           "instant": false,
           "legendFormat": "{{job}}",
@@ -279,7 +279,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "time_to_first_byte_seconds_sum{job=\"DeepInfra\"} / time_to_first_byte_seconds_count",
+          "expr": "delta(time_to_first_byte_seconds_sum{job=\"DeepInfra\"}[1m]) / delta(time_to_first_byte_seconds_count{job=\"DeepInfra\"}[1m])",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -313,7 +313,7 @@
               },
               {
                 "color": "red",
-                "value": 5
+                "value": 10
               }
             ]
           }
@@ -606,5 +606,5 @@
   "timezone": "browser",
   "title": "llm-monitor",
   "uid": "847a0594-6efc-4ba9-a3d1-94acfde895e7",
-  "version": 2
+  "version": 5
 }
