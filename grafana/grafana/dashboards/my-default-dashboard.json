@@ -157,7 +157,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "1000000 * 100 / (rate(vllm_output_qps_total{job=\"Ours\"}[1m]) * 20100) * 1.5 / 3600",
+          "expr": "1000000 * 100 / (rate(vllm_output_qps_total{job=\"Ours\"}[1m]) * 20100) * 3.5 / 3600",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "{{job}}",
@@ -171,7 +171,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "1000000 * 100 / (rate(vllm_output_qps_total{job=\"Fireworks\"}[1m]) * 20100) * 1.5 / 3600",
+          "expr": "1000000 * 100 / (rate(vllm_output_qps_total{job=\"Fireworks\"}[1m]) * 20100) * 11.6 / 3600",
           "hide": false,
           "instant": false,
           "legendFormat": "{{job}}",
@@ -184,7 +184,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "1000000 * 100 / (rate(vllm_output_qps_total{job=\"DeepInfra\"}[1m]) * 20100) * 1.5 / 3600",
+          "expr": "1000000 * 100 / (rate(vllm_output_qps_total{job=\"DeepInfra\"}[1m]) * 20100) * 4.8 / 3600",
           "hide": false,
           "instant": false,
           "legendFormat": "{{job}}",
