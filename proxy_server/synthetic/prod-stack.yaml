@@ -23,7 +23,7 @@ servingEngineSpec:
       cpuOffloadingBufferSize: "150"
       enableLayerwise: false
 
-    hf_token: "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"
+    hf_token: "REPLACE_WITH_HF_TOKEN"
 
 routerSpec:
   repository: "lmcache/lmstack-router"
