@@ -13,11 +13,11 @@ OURS_API_KEY        = os.environ.get("OURS_API_KEY", "dummy_api_key_for_ours")
 OURS_BASE_URL       = os.environ.get("OURS_BASE_URL", "http://0.0.0.0:8001/v1")
 OURS_MODEL          = "meta-llama/Llama-3.1-8B-Instruct"
 
-FIREWORKS_API_KEY   = os.environ.get("FIREWORKS_API_KEY", "fw_3ZRkgxTnPVjigjPUTgCb38ot")
+FIREWORKS_API_KEY   = os.environ.get("FIREWORKS_API_KEY", "REPLACE_WITH_FIREWORKS_API_KEY")
 FIREWORKS_BASE_URL  = os.environ.get("FIREWORKS_BASE_URL", "http://0.0.0.0:8002/v1")
 FIREWORKS_MODEL     = "accounts/zhuohangu/deployedModels/llama-v3p1-8b-instruct-wejcmmxe"
 
-DEEPINFRA_API_KEY   = os.environ.get("DEEPINFRA_API_KEY", "1Ft8yuNBUkITVoVbCpyMMIsqglirxxpr")
+DEEPINFRA_API_KEY   = os.environ.get("DEEPINFRA_API_KEY", "REPLACE_WITH_DEEPINFRA_API_KEY")
 DEEPINFRA_BASE_URL  = os.environ.get("DEEPINFRA_BASE_URL", "http://0.0.0.0:8003")
 DEEPINFRA_MODEL     = "tensormesh/Meta-Llama-3.1-8B-Instruct"
 
