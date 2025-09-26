@@ -135,7 +135,7 @@ class RequestExecutor:
         if not base_url.endswith('/v1'):
             base_url = base_url.rstrip('/') + '/v1'
         self.client = openai.AsyncOpenAI(
-            api_key="fw_3ZRkgxTnPVjigjPUTgCb38ot",  # Dummy API key for vLLM server
+            api_key="",  # Dummy API key for vLLM server
             base_url=base_url
         )
         self.model = model
